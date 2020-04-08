@@ -15,7 +15,7 @@ Download and unzip the source repository for this guide, or clone it using Git:
 ```
 git clone https://github.com/Aymen0x0/spring-boot-rest-api-mongodb.git
 ```
-Note : I've used my previous project named spring-boot-rest-api-mongodb, just to show how to dockernize it using Docker.
+Note : I've used my previous project named spring-boot-rest-api-mongodb, just to show how you can dockernize it.
 
 Full instructions can be found on https://github.com/Aymen0x0/spring-boot-rest-api-mongodb
 
@@ -85,7 +85,7 @@ This Dockerfile Tell Docker that our image will be based on another image called
 
 COPY : this instruction will copy-paste the generated JAR file to the container.
 
-ENTRYPOINT : the last instruction tell docker to run and execute the application.
+ENTRYPOINT : this instruction tell docker to run and execute the application.
 
 2. Then, go back to the terminal and type this command:
 ```
