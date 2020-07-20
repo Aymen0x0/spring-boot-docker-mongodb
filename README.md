@@ -15,49 +15,33 @@ Download and unzip the source repository for this guide, or clone it using Git:
 ```
 git clone https://github.com/Aymen0x0/spring-boot-rest-api-mongodb.git
 ```
-Note : I've used my previous project named spring-boot-rest-api-mongodb, just to show how you can dockernize it.
-
 Full instructions can be found on https://github.com/Aymen0x0/spring-boot-rest-api-mongodb
 
- ## Deploying an Instance of MongoDB as a Container and setting up the database
+## User-defined bridge
+Using a user-defined network provides a scoped network in which only containers attached to that network are able to communicate.
+
+In order to achieve this, open your Terminal and type :
+
+```
+docker network create mynetwork
+```
+## Deploying an Instance of MongoDB as a Container and setting up the database
 1. Open a terminal and type this command :
 ```
-docker run -d --name db mongo
-```
-Note : A mongoDB instance is running with default port 27017 (option -d means that a docker container runs in the background of your terminal)
-
-2. Create your database using the interactive mode.
-```
-docker exec -it <container_id (first four digits) Or container_name> mongo
-```
-Then type the following command :
-```
-use MongoDbDemo
+docker run -d -e MONGO_INITDB_DATABASE=MongoDbDemo --name my_mongo_host --network mynetwork mongo
 ```
 
-3. To be able to establish a connection to MongoDB from the application.
+Note : A mongoDB instance is running with default port 27017.
 
-3.1 type the following command :
-```
-docker inspect <container_id (first four digits) Or container_name>
-```
-The inspect command will list the complete information of the container.
+The ``` -d ``` option means that a docker container will run in the background of your terminal.
 
-3.2 Search for :
-```
-"IPAddress"
-```
-In my case, it shows the following :
-```
-                    "Gateway": "172.17.0.1",
-                    "IPAddress": "172.17.0.2",
-                    "IPPrefixLen": 16,
-                    "IPv6Gateway": "",
-```
+The Environment Variable ``` -e MONGO_INITDB_DATABASE ``` allows us to specify the name of the database (In my case it's named MongoDbDemo).
 
-3.3	Then, Open src/main/resources/application.properties in order to set the database name and the host ip. It should have these following lines : 
+The ``` --name ``` option allows us to assign a name to the container. So, you can use it when referencing the container within a Docker network.
+
+2. Then, Open src/main/resources/application.properties in order to set the database name and the host name. It should have these following lines : 
 ```
-spring.data.mongodb.host=172.17.0.2
+spring.data.mongodb.host=my_mongo_host
 spring.data.mongodb.port=27017
 spring.data.mongodb.database=MongoDbDemo
 spring.data.mongodb.repositories.enabled=true
@@ -83,9 +67,9 @@ ENTRYPOINT ["java","-jar","/app.jar"]
 ```
 This Dockerfile Tell Docker that our image will be based on another image called openjdk:8 that is available on docker repository (Docker Hub).
 
-COPY : this instruction will copy-paste the generated JAR file to the container.
+``` COPY : ``` this instruction will copy-paste the generated JAR file to the container.
 
-ENTRYPOINT : this instruction tell docker to run and execute the application.
+``` ENTRYPOINT : ``` this instruction tells docker to run and execute the application.
 
 2. Then, go back to the terminal and type this command:
 ```
@@ -109,9 +93,11 @@ mongo               latest              c5e5843d9f5f        6 days ago          
 ```
 2. To run the image you’ve just created use following command:
 ```
-docker run -d -p 80:8080 springboot-mongo
+docker run -d -p 9091:8080 --network mynetwork springboot-mongo
 ```
-The -p option map the port number of the container to the port number of the Docker host in order to access to the application externally.
+The ```-p``` option map the port number of the container to the port number of the Docker host in order to get access to the application externally.
+
+The ```--network ``` option links the container to the network that we've created at the beginning of this guide.
 
 Note : By default, Tomcat listens on port 8080
 
@@ -121,13 +107,13 @@ docker ps
 ```
 You should see the following : 
 ```
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES
-3c7d564cef2b        springboot-mongo    "java -jar /app.jar"     4 hours ago         Up 4 hours          0.0.0.0:80->8080/tcp    hopeful_mendeleev
-cf48a9baba82        mongo               "docker-entrypoint.s…"   About a minute ago   Up 21 seconds       27017/tcp                 db
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES
+f5a13241eeb4        springboot-mongo    "java -jar /app.jar"     About an hour ago   Up About an hour    0.0.0.0:9091->8080/tcp   nervous_margulis
+e0f7d3ba530b        mongo               "docker-entrypoint.s…"   About an hour ago   Up About an hour    27017/tcp                my_mongo_host
 ```
-4. Open your Web Browser or a REST client app such as (Postman, Advanced REST Client, etc.) and type :
+4. To get access to the API externally, open your Web Browser or a REST client app such as (Postman, Advanced REST Client, etc.) and type :
 ```
-<Your docker host ip address>:80/client
+<Your docker host ip address>:9091/client
 ```
 You should normally get the results in JSON format.
 
