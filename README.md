@@ -91,7 +91,7 @@ REPOSITORY          TAG                 IMAGE ID            CREATED             
 springboot-mongo    latest              266f68dc5f4c        4 hours ago         130MB
 mongo               latest              c5e5843d9f5f        6 days ago          387MB
 ```
-2. To run the image you’ve just created use following command:
+2. To run an instance of the image that we've just created using Dockerfile, type the following command:
 ```
 docker run -d -p 9091:8080 --network mynetwork springboot-mongo
 ```
